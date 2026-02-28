@@ -1,0 +1,1 @@
+NEXT_PUBLIC_API_URL="https://script.google.com/macros/s/TU_ID_DE_SCRIPT/exec"
