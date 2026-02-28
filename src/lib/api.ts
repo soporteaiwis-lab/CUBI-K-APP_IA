@@ -3,13 +3,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://script.google.com/macro
 
 export const fetchTodo = async () => {
   try {
-    // Usamos fetch en lugar de axios para evitar peticiones preflight (OPTIONS)
-    // que suelen causar problemas de CORS con Google Apps Script.
-    const response = await fetch(`${API_URL}?action=getTodo`, {
+    // Usamos un proxy CORS gratuito (allorigins) para evitar los bloqueos de Google Apps Script
+    // en entornos de desarrollo local o vistas previas web.
+    const targetUrl = `${API_URL}?action=getTodo`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    
+    const response = await fetch(proxyUrl, {
       method: 'GET',
-      headers: {
-        // No enviamos headers personalizados para mantenerlo como una "simple request"
-      }
     });
     
     if (!response.ok) {
@@ -19,16 +19,9 @@ export const fetchTodo = async () => {
     const data = await response.json();
     return data;
   } catch (error: any) {
-    console.error('Error fetching data from Google Apps Script:', error);
+    console.warn('No se pudo conectar con Google Apps Script. Verificando permisos o CORS...', error.message);
     
-    // Si es un error de red (CORS) o 403, usualmente es por permisos en Apps Script
-    if (error.message === 'Failed to fetch' || error.message === 'Network Error' || (error.response && error.response.status === 403)) {
-      throw new Error(
-        'Error de conexión con Google Apps Script. ' +
-        'Asegúrate de que la API esté publicada como Aplicación Web y que "Quién tiene acceso" esté configurado como "Cualquier persona" (Anyone).'
-      );
-    }
-    
-    throw error;
+    // Lanzamos el error para que el Contexto Global lo atrape y use los datos de prueba
+    throw new Error('Error de conexión con la API');
   }
 };
