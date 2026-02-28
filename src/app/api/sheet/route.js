@@ -1,53 +1,39 @@
 import { NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// ESTO ES CRÍTICO: Obliga a Next.js a no usar caché y consultar en tiempo real
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
+  const url = new URL(request.url);
+  const action = url.searchParams.get("action") || "getTodo";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!API_URL) {
+    return NextResponse.json({ success: false, error: "Falta NEXT_PUBLIC_API_URL en Vercel" }, { status: 500 });
+  }
+
   try {
-    // Obtenemos los parámetros de la URL (por si queremos pasar ?action=getTodo)
-    const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action') || 'getTodo';
-    
-    // Hacemos fetch a Google Apps Script desde el servidor (evita CORS)
-    const response = await fetch(`${API_URL}?action=${action}`, {
-      // Evitamos que Next.js cachee esta respuesta para tener datos en tiempo real
-      cache: 'no-store', 
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-
-    const data = await response.json();
+    // Añadimos cache: 'no-store' por doble seguridad
+    const res = await fetch(`${API_URL}?action=${action}`, { cache: 'no-store' });
+    const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error en GET /api/sheet:', error);
-    return NextResponse.json(
-      { error: 'Error al conectar con Google Apps Script' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Error de red al conectar con Google Sheets" }, { status: 500 });
   }
 }
 
 export async function POST(request) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   try {
     const body = await request.json();
-    
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8', // Apps Script prefiere text/plain para evitar preflight en algunos casos, aunque desde el server no hay CORS
-      },
       body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    const data = await response.json();
+    const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error en POST /api/sheet:', error);
-    return NextResponse.json(
-      { error: 'Error al enviar datos a Google Apps Script' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
