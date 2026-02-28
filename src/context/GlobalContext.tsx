@@ -43,13 +43,23 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {
         console.warn('Usando datos de prueba ya que la API falló o no está configurada.');
         data = {
-          configuracion: { theme: 'dark' },
+          configuracion: { theme: 'dark', portalName: 'CUBI-K Portal' },
           usuarios: [
-            { Email_Corporativo: 'admin@aiwis.cl', Rol: 'Admin', Nombre: 'Armin Salazar' },
-            { Email_Corporativo: 'user@aiwis.cl', Rol: 'Usuario', Nombre: 'Estudiante' }
+            { Email_Corporativo: 'admin@aiwis.cl', Rol: 'Admin', Nombre: 'Armin Salazar', Estado: 'Activo' },
+            { Email_Corporativo: 'user@aiwis.cl', Rol: 'Usuario', Nombre: 'Estudiante Demo', Estado: 'Activo' },
+            { Email_Corporativo: 'maria@aiwis.cl', Rol: 'Usuario', Nombre: 'María López', Estado: 'Inactivo' },
+            { Email_Corporativo: 'carlos@aiwis.cl', Rol: 'Usuario', Nombre: 'Carlos Pérez', Estado: 'Activo' }
           ],
-          clases: [],
-          proyectos: []
+          clases: [
+            { id: 1, nombre: 'Introducción a IA', estudiantes: 24, estado: 'En curso' },
+            { id: 2, nombre: 'Machine Learning Básico', estudiantes: 18, estado: 'Planificada' },
+            { id: 3, nombre: 'Ética en IA', estudiantes: 32, estado: 'Completada' }
+          ],
+          proyectos: [
+            { id: 1, nombre: 'Chatbot Corporativo', progreso: 75, responsable: 'Armin Salazar' },
+            { id: 2, nombre: 'Análisis de Datos', progreso: 30, responsable: 'María López' },
+            { id: 3, nombre: 'Automatización RPA', progreso: 100, responsable: 'Carlos Pérez' }
+          ]
         };
       }
       
